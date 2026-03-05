@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: database-service
+  namespace: microservices
+  labels:
+    app: database-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: database-service
+  template:
+    metadata:
+      labels:
+        app: database-service
+    spec:
+      containers:
+      - name: database-service
+        image: python:3.9-slim
+        command: ["python", "-c"]
+        args:
+        - |
+          import time, random, logging
+          logging.basicConfig(
+            format='%(asctime)s %(levelname)s %(message)s',
+            level=logging.DEBUG
+          )
+          logger = logging.getLogger('database-service')
+          messages = [
+            ("INFO", "Query executed: SELECT * FROM users WHERE id=1242"),
+            ("INFO", "Connection pool: 45/100 connections active"),
+            ("WARNING", "Slow query detected: 3200ms execution time"),
+            ("WARNING", "Connection pool at 80% capacity"),
+            ("ERROR", "Deadlock detected on table orders"),
+            ("ERROR", "Disk usage at 95% - critical threshold"),
+            ("INFO", "Backup completed successfully"),
+            ("ERROR", "Replication lag: 45 seconds behind primary"),
+          ]
+          while True:
+            level, msg = random.choice(messages)
+            if level == "INFO": logger.info(msg)
+            elif level == "WARNING": logger.warning(msg)
+            elif level == "ERROR": logger.error(msg)
+            time.sleep(random.uniform(1, 5))
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: database-service
+  namespace: microservices
+spec:
+  selector:
+    app: database-service
+  ports:
+  - port: 5432
+    targetPort: 5432
+  type: ClusterIP

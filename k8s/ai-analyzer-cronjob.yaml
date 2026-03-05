@@ -1,0 +1,34 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: ai-log-analyzer
+  namespace: ai-analyzer
+spec:
+  schedule: "*/5 * * * *"
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 60
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+          - name: ai-log-analyzer
+            image: ai-log-analyzer:v2
+            imagePullPolicy: Never
+            env:
+            - name: GROQ_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ai-analyzer-secrets
+                  key: GROQ_API_KEY
+            - name: DISCORD_WEBHOOK_URL
+              valueFrom:
+                secretKeyRef:
+                  name: ai-analyzer-secrets
+                  key: DISCORD_WEBHOOK_URL
+            - name: ELASTICSEARCH_HOST
+              value: "elasticsearch.logging.svc.cluster.local"
+            - name: ELASTICSEARCH_PORT
+              value: "9200"
