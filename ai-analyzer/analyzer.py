@@ -115,7 +115,7 @@ def send_discord_alert(analysis, log_count):
 
 def run_analysis():
     print("=" * 60)
-    print("🔍 AI LOG ANALYZER - Starting Analysis")
+    print("🔍 AI LOG ANALYZER v2.0 - Starting Analysis")
     print(f"⏰ Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print("=" * 60)
     logs = fetch_recent_logs(minutes=5)
